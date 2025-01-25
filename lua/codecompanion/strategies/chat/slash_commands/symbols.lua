@@ -1,19 +1,49 @@
-local path = require("plenary.path")
+--[[
+Uses Tree-sitter to parse a given file and extract symbol types and names. Then
+displays those symbols in the chat buffer as references. To support tools
+and agents, start and end lines for the symbols are also output.
 
+Heavily modified from the awesome Aerial.nvim plugin by stevearc:
+https://github.com/stevearc/aerial.nvim/blob/master/lua/aerial/backends/treesitter/init.lua
+--]]
 local config = require("codecompanion.config")
 local log = require("codecompanion.utils.log")
+local path = require("plenary.path")
 local util = require("codecompanion.utils")
 
 local fmt = string.format
+local get_node_text = vim.treesitter.get_node_text --[[@type function]]
 
 CONSTANTS = {
   NAME = "Symbols",
   PROMPT = "Select symbol(s)",
 }
 
+---Get the range of two nodes
+---@param start_node TSNode
+---@param end_node TSNode
+local function range_from_nodes(start_node, end_node)
+  local row, col = start_node:start()
+  local end_row, end_col = end_node:end_()
+  return {
+    lnum = row + 1,
+    end_lnum = end_row + 1,
+    col = col,
+    end_col = end_col,
+  }
+end
+
+---Return when no symbols query exists
+local function no_query(ft)
+  util.notify(
+    fmt("There are no Tree-sitter symbol queries for `%s` files yet. Please consider making a PR", ft),
+    vim.log.levels.WARN
+  )
+end
+
 ---Return when no symbols have been found
 local function no_symbols()
-  util.notify("No symbols found in the buffer", vim.log.levels.WARN)
+  util.notify("No symbols found in the given file", vim.log.levels.WARN)
 end
 
 local providers = {
@@ -137,20 +167,17 @@ function SlashCommand:output(selected, opts)
   local query = vim.treesitter.query.get(ft, "symbols")
 
   if not query then
-    return no_symbols()
+    return no_query(ft)
   end
 
   local parser = vim.treesitter.get_string_parser(content, ft)
   local tree = parser:parse()[1]
 
-  local function get_ts_node(output_tbl, type, match)
-    table.insert(output_tbl, fmt(" - %s %s", type, vim.trim(vim.treesitter.get_node_text(match.node, content, match))))
-  end
-
   local symbols = {}
-  for _, matches, metadata in query:iter_matches(tree:root(), content, 0, -1, { all = false }) do
+  for _, matches, metadata in query:iter_matches(tree:root(), content) do
     local match = vim.tbl_extend("force", {}, metadata)
-    for id, node in pairs(matches) do
+    for id, nodes in pairs(matches) do
+      local node = type(nodes) == "table" and nodes[1] or nodes
       match = vim.tbl_extend("keep", match, {
         [query.captures[id]] = {
           metadata = metadata[id],
@@ -159,18 +186,25 @@ function SlashCommand:output(selected, opts)
       })
     end
 
-    local symbol_node = (match.symbol or {}).node
+    local name_match = match.name or {}
+    local symbol_node = (match.symbol or match.type or {}).node
 
     if not symbol_node then
       goto continue
     end
 
-    local name_match = match.name or {}
+    local start_node = (match.start or {}).node or symbol_node
+    local end_node = (match["end"] or {}).node or start_node
+
     local kind = match.kind
 
     local kinds = {
+      "Import",
+      "Enum",
       "Module",
       "Class",
+      "Struct",
+      "Interface",
       "Method",
       "Function",
     }
@@ -181,7 +215,12 @@ function SlashCommand:output(selected, opts)
         return kind == k
       end)
       :each(function(k)
-        get_ts_node(symbols, k:lower(), name_match)
+        local range = range_from_nodes(start_node, end_node)
+        if name_match.node then
+          local name = vim.trim(get_node_text(name_match.node, content)) or "<parse error>"
+
+          table.insert(symbols, fmt("- %s: `%s` (from line %s to %s)", k:lower(), name, range.lnum, range.end_lnum))
+        end
       end)
 
     ::continue::
@@ -194,18 +233,36 @@ function SlashCommand:output(selected, opts)
   local id = "<symbols>" .. (selected.relative_path or selected.path) .. "</symbols>"
   content = table.concat(symbols, "\n")
 
-  self.Chat:add_message({
-    role = config.constants.USER_ROLE,
-    content = fmt(
-      [[Here is a symbolic outline of the file `%s` with filetype `%s`:
+  -- Workspaces allow the user to set their own custom description which should take priority
+  local description
+  if selected.description then
+    description = fmt(
+      [[%s
 
-<symbols>
+```%s
 %s
-</symbols>]],
+```]],
+      selected.description,
+      ft,
+      content
+    )
+  else
+    description = fmt(
+      [[Here is a symbolic outline of the file `%s` (with filetype `%s`). I've also included the line numbers that each symbol starts and ends on in the file:
+
+%s
+
+Prompt the user if you need to see more than the symbolic outline.
+]],
       selected.relative_path or selected.path,
       ft,
       content
-    ),
+    )
+  end
+
+  self.Chat:add_message({
+    role = config.constants.USER_ROLE,
+    content = description,
   }, { reference = id, visible = false })
 
   self.Chat.References:add({

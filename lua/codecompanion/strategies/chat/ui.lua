@@ -8,6 +8,7 @@ local yaml = require("codecompanion.utils.yaml")
 
 local log = require("codecompanion.utils.log")
 local ui = require("codecompanion.utils.ui")
+local util = require("codecompanion.utils")
 
 local api = vim.api
 
@@ -120,7 +121,7 @@ function UI:open()
   self:follow()
 
   log:trace("Chat opened with ID %d", self.id)
-
+  util.fire("ChatOpened", { bufnr = self.bufnr })
   return self
 end
 
@@ -141,6 +142,8 @@ function UI:hide()
   else
     vim.cmd("buffer " .. vim.fn.bufnr("#"))
   end
+
+  util.fire("ChatHidden", { bufnr = self.bufnr })
 end
 
 ---Follow the cursor in the chat buffer
@@ -396,9 +399,10 @@ function UI:fold_code()
   vim.o.foldmethod = "manual"
 
   local role
-  for _, matches in query:iter_matches(tree:root(), self.bufnr, nil, nil, { all = false }) do
+  for _, matches in query:iter_matches(tree:root(), self.bufnr) do
     local match = {}
-    for id, node in pairs(matches) do
+    for id, nodes in pairs(matches) do
+      local node = type(nodes) == "table" and nodes[1] or nodes
       match = vim.tbl_extend("keep", match, {
         [query.captures[id]] = {
           node = node,

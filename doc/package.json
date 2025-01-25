@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vitepress dev",
     "build": "vitepress build",
-    "build:release": "IS_RELEASE=true vitepress build",
+    "build:release": "NODE_ENV=production vitepress build",
     "preview": "vitepress preview"
   }
 }

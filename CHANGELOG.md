@@ -1,5 +1,79 @@
 # Changelog
 
+## [11.14.0](https://github.com/olimorris/codecompanion.nvim/compare/v11.13.2...v11.14.0) (2025-01-25)
+
+
+### Features
+
+* :sparkles: workspace slash command ([#702](https://github.com/olimorris/codecompanion.nvim/issues/702)) ([8173b5d](https://github.com/olimorris/codecompanion.nvim/commit/8173b5df1cd8da856b9449b4f68a8cd64d60f08d))
+
+## [11.13.2](https://github.com/olimorris/codecompanion.nvim/compare/v11.13.1...v11.13.2) (2025-01-25)
+
+### Bug Fixes
+
+* **deepseek:** messages order ([#700](https://github.com/olimorris/codecompanion.nvim/issues/700)) ([c911a8e](https://github.com/olimorris/codecompanion.nvim/commit/c911a8e6f0bc87f557587cc60b2af27d6151ad19))
+
+## [11.13.1](https://github.com/olimorris/codecompanion.nvim/compare/v11.13.0...v11.13.1) (2025-01-24)
+
+### Bug Fixes
+
+- fix(inline): #688 end_col out of range
+
+### Others
+
+- chore(ci): remove release workflow
+- chore(ci): update release workflow
+- chore: update CHANGELOG.md
+
+## [11.13.0](https://github.com/olimorris/codecompanion.nvim/compare/v11.12.1...v11.13.0) (2025-01-23)
+
+### Features
+
+* **adapters:** add DeepSeek Adapter ([6668b5c](https://github.com/olimorris/codecompanion.nvim/commit/6668b5c517978207a7b00f3f5a9bc8c7760ebcad))
+
+
+## [11.12.1](https://github.com/olimorris/codecompanion.nvim/compare/v11.12.0...v11.12.1) (2025-01-18)
+
+
+### Bug Fixes
+
+* **slash_command:** stop double wrapping output from `fetch` ([c53a917](https://github.com/olimorris/codecompanion.nvim/commit/c53a917803888458ba7955e52870353345c9c48c))
+
+## [11.12.0](https://github.com/olimorris/codecompanion.nvim/compare/v11.11.0...v11.12.0) (2025-01-18)
+
+
+### Features
+
+* register source for filetype in blink.cmp ([#661](https://github.com/olimorris/codecompanion.nvim/issues/661)) ([2214916](https://github.com/olimorris/codecompanion.nvim/commit/2214916416dcf18741c65fe3afd034d0fe046263))
+* **tools:** `[@files](https://github.com/files)` tool can now read specific lines ([26c5b57](https://github.com/olimorris/codecompanion.nvim/commit/26c5b57aa80cb7a12baefa5a5a2e9cfe0a20126a))
+
+## [11.11.0](https://github.com/olimorris/codecompanion.nvim/compare/v11.10.0...v11.11.0) (2025-01-15)
+
+
+### Features
+
+* **chat:** :sparkles: can watch buffers ([176c13e](https://github.com/olimorris/codecompanion.nvim/commit/176c13e227cf39c4e22bec68d4631a8c47b643de))
+
+
+### Bug Fixes
+
+* **slash_cmd:** improve symbols notifcations ([e6b36b4](https://github.com/olimorris/codecompanion.nvim/commit/e6b36b4448cb12215fb74372ce9868f61e046bea))
+
+## [11.10.0](https://github.com/olimorris/codecompanion.nvim/compare/v11.9.2...v11.10.0) (2025-01-15)
+
+
+### Features
+
+* add new events ([9b85331](https://github.com/olimorris/codecompanion.nvim/commit/9b8533143e381fb0dd4e5c733217dac8f9852ea4))
+
+## [11.9.2](https://github.com/olimorris/codecompanion.nvim/compare/v11.9.1...v11.9.2) (2025-01-13)
+
+
+### Bug Fixes
+
+* **slash_commands:** handle no content in `terminal` slash command ([aae2085](https://github.com/olimorris/codecompanion.nvim/commit/aae208550ade2d1cbcfaada2c72aeeee83b989b0))
+* **yaml:** handle nil values in show_settings ([9b44789](https://github.com/olimorris/codecompanion.nvim/commit/9b447897320ee149531b6d6d8f90b25d97880666))
+
 ## [11.9.1](https://github.com/olimorris/codecompanion.nvim/compare/v11.9.0...v11.9.1) (2025-01-11)
 
 
